@@ -1,1 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ details.title or details.name }}</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>{{ details.title or details.name }}</h1>
+    <img src="https://image.tmdb.org/t/p/w300{{ details.poster_path }}" alt="{{ details.title or details.name }}">
+    <p><strong>Overview:</strong> {{ details.overview }}</p>
+    <p><strong>Rating:</strong> {{ details.vote_average }}</p>
+    <p><strong>Genres:</strong> {{ ', '.join([genre['name'] for genre in details.genres]) }}</p>
+    <p><strong>Release Date:</strong> {{ details.release_date or details.first_air_date }}</p>
+</body>
+</html>
 
