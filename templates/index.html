@@ -7,8 +7,9 @@
     <script>
         async function searchContent() {
             const minRating = document.getElementById("min_rating").value;
-            const genre = document.getElementById("genre").value;
             const type = document.querySelector('input[name="type"]:checked').value;
+
+            const genre = document.getElementById(type === 'movie' ? "movie_genre" : "tv_genre").value;
 
             const response = await fetch(`/search?min_rating=${minRating}&genre=${genre}&type=${type}`);
             const data = await response.json();
@@ -22,32 +23,58 @@
                 results.forEach(item => {
                     const div = document.createElement("div");
                     div.className = "item";
-                    div.innerHTML = `<img src="https://image.tmdb.org/t/p/w200${item.poster_path}" alt="${item.title || item.name}">
-                                     <h4>${item.title || item.name}</h4>
-                                     <p>Rating: ${item.vote_average}</p>`;
-                    div.onclick = () => window.location.href = `/details/${item.media_type || 'movie'}/${item.id}`;
+                    const title = item.title || item.name;
+                    const imageUrl = `https://image.tmdb.org/t/p/w200${item.poster_path}`;
+                    const contentType = document.querySelector('input[name="type"]:checked').value;
+
+                    div.innerHTML = `
+                        <img src="${imageUrl}" alt="${title}">
+                        <h4>${title}</h4>
+                        <p>Rating: ${item.vote_average}</p>`;
+                    div.onclick = () => window.location.href = `/details/${contentType}/${item.id}`;
+
                     resultsDiv.appendChild(div);
                 });
             } else {
                 resultsDiv.innerHTML = "<p>No results found. Try adjusting your filters.</p>";
             }
         }
+
+        function toggleGenreDropdown() {
+            const type = document.querySelector('input[name="type"]:checked').value;
+            document.getElementById("movie_genre").style.display = type === 'movie' ? 'block' : 'none';
+            document.getElementById("tv_genre").style.display = type === 'tv' ? 'block' : 'none';
+        }
     </script>
 </head>
 <body>
     <h1>Find Movies or TV Series</h1>
-    <input type="number" id="min_rating" placeholder="Minimum Rating">
-    <select id="genre">
-        <option value="">Select Genre</option>
-        {% for genre in genres %}
-            <option value="{{ genre.id }}">{{ genre.name }}</option>
-        {% endfor %}
-    </select>
-    <div>
-        <label><input type="radio" name="type" value="movie" checked> Movie</label>
-        <label><input type="radio" name="type" value="tv"> TV Series</label>
-    </div>
-    <button onclick="searchContent()">Search</button>
+    
+    <form>
+        <input type="number" id="min_rating" placeholder="Minimum Rating" min="0" max="10">
+        
+        <select id="movie_genre" style="display: block;">
+            <option value="">Select Movie Genre</option>
+            {% for genre in movie_genres %}
+                <option value="{{ genre.id }}">{{ genre.name }}</option>
+            {% endfor %}
+        </select>
+
+        <select id="tv_genre" style="display: none;">
+            <option value="">Select TV Genre</option>
+            {% for genre in tv_genres %}
+                <option value="{{ genre.id }}">{{ genre.name }}</option>
+            {% endfor %}
+        </select>
+        
+        <div>
+            <label><input type="radio" name="type" value="movie" checked onchange="toggleGenreDropdown()"> Movie</label>
+            <label><input type="radio" name="type" value="tv" onchange="toggleGenreDropdown()"> TV Series</label>
+        </div>
+
+        <button type="button" onclick="searchContent()">Search</button>
+    </form>
+
     <div id="results"></div>
 </body>
 </html>
