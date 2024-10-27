@@ -3,7 +3,7 @@ import requests
 
 app = Flask(__name__)
 
-API_KEY = 'your_tmdb_api_key'  # Replace with your TMDb API key
+API_KEY = 'a211e041c39243724424cedbb1fd8286'  # Replace with your TMDb API key
 BASE_URL = 'https://api.themoviedb.org/3'
 
 def fetch_from_tmdb(endpoint, params=None):
@@ -16,25 +16,22 @@ def fetch_from_tmdb(endpoint, params=None):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Fetch genres list to show in dropdown
+    genres = fetch_from_tmdb("genre/movie/list")["genres"]
+    return render_template('index.html', genres=genres)
 
 @app.route('/search', methods=['GET'])
 def search():
-    title = request.args.get('title')
     min_rating = request.args.get('min_rating')
     genre_id = request.args.get('genre')
     content_type = request.args.get('type', 'movie')  # 'movie' or 'tv'
 
-    # Search for movie or TV series by title
-    search_results = fetch_from_tmdb(f"search/{content_type}", {"query": title}) if title else {}
-
-    # Filter by rating and genre if applicable
-    if search_results and (min_rating or genre_id):
-        search_results['results'] = [
-            item for item in search_results.get('results', [])
-            if (float(item['vote_average']) >= float(min_rating) if min_rating else True) and
-               (genre_id in [str(g) for g in item['genre_ids']] if genre_id else True)
-        ]
+    # Discover movies or TV shows based on provided filters
+    search_params = {
+        "vote_average.gte": min_rating,
+        "with_genres": genre_id,
+    }
+    search_results = fetch_from_tmdb(f"discover/{content_type}", search_params)
 
     return jsonify(search_results)
 
@@ -46,4 +43,3 @@ def details(content_type, item_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
-

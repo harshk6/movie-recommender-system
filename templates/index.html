@@ -6,12 +6,11 @@
     <link rel="stylesheet" href="/static/styles.css">
     <script>
         async function searchContent() {
-            const title = document.getElementById("title").value;
             const minRating = document.getElementById("min_rating").value;
             const genre = document.getElementById("genre").value;
             const type = document.querySelector('input[name="type"]:checked').value;
 
-            const response = await fetch(`/search?title=${title}&min_rating=${minRating}&genre=${genre}&type=${type}`);
+            const response = await fetch(`/search?min_rating=${minRating}&genre=${genre}&type=${type}`);
             const data = await response.json();
             displayResults(data.results);
         }
@@ -19,23 +18,31 @@
         function displayResults(results) {
             const resultsDiv = document.getElementById("results");
             resultsDiv.innerHTML = "";
-            results.forEach(item => {
-                const div = document.createElement("div");
-                div.className = "item";
-                div.innerHTML = `<img src="https://image.tmdb.org/t/p/w200${item.poster_path}" alt="${item.title || item.name}">
-                                 <h4>${item.title || item.name}</h4>
-                                 <p>Rating: ${item.vote_average}</p>`;
-                div.onclick = () => window.location.href = `/details/${item.media_type || 'movie'}/${item.id}`;
-                resultsDiv.appendChild(div);
-            });
+            if (results && results.length) {
+                results.forEach(item => {
+                    const div = document.createElement("div");
+                    div.className = "item";
+                    div.innerHTML = `<img src="https://image.tmdb.org/t/p/w200${item.poster_path}" alt="${item.title || item.name}">
+                                     <h4>${item.title || item.name}</h4>
+                                     <p>Rating: ${item.vote_average}</p>`;
+                    div.onclick = () => window.location.href = `/details/${item.media_type || 'movie'}/${item.id}`;
+                    resultsDiv.appendChild(div);
+                });
+            } else {
+                resultsDiv.innerHTML = "<p>No results found. Try adjusting your filters.</p>";
+            }
         }
     </script>
 </head>
 <body>
     <h1>Find Movies or TV Series</h1>
-    <input type="text" id="title" placeholder="Enter movie or series title">
     <input type="number" id="min_rating" placeholder="Minimum Rating">
-    <input type="text" id="genre" placeholder="Genre ID">
+    <select id="genre">
+        <option value="">Select Genre</option>
+        {% for genre in genres %}
+            <option value="{{ genre.id }}">{{ genre.name }}</option>
+        {% endfor %}
+    </select>
     <div>
         <label><input type="radio" name="type" value="movie" checked> Movie</label>
         <label><input type="radio" name="type" value="tv"> TV Series</label>
@@ -44,4 +51,3 @@
     <div id="results"></div>
 </body>
 </html>
-
