@@ -1,1 +1,31 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+}
+
+#results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    width: 200px;
+    cursor: pointer;
+    transition: box-shadow 0.3s;
+}
+
+.item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+img {
+    max-width: 100%;
+}
 
